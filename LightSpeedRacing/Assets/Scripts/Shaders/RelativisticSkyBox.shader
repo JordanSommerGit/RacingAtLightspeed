@@ -51,6 +51,12 @@
 
                output.viewDir = mul(unity_ObjectToWorld, input.vertex).xyz - _WorldSpaceCameraPos;
 
+               //float3 forward = float3(0, 0, 1);
+               //float angleToVertex = dot(forward, input.vertex);
+
+               //float newAngle = (cos(angleToVertex) + _SpeedOverSpeedOfLight)
+               //    / (1 + _SpeedOverSpeedOfLight * cos(angleToVertex));
+
                float sigma = dot(input.vertex, input.vertex) / _SphereSize;
                float sigmaSquared = sigma * sigma;
                float vSquared = _PlayerSpeed * _PlayerSpeed;
