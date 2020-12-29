@@ -12,7 +12,7 @@
             Pass
             {
                 ZWrite Off
-                Cull Front
+                Cull Back
 
                 CGPROGRAM
 
@@ -51,6 +51,7 @@
                 float4 _PlayerVelocity = float4(0, 0, 0, 0);
                 float _PlayerSpeed = 0;
                 float _LightSpeed = 100;
+                float4 _PlayerOffset = float4(0, 0, 0, 0);
 
                 struct vertexInput
                 {
@@ -69,8 +70,8 @@
                 {
                    vertexOutput output;
 
-                   output.angle = acos(dot(_PlayerVelocity, float3(1, 0, 0)));
                    output.viewDir = mul(unity_ObjectToWorld, input.vertex).xyz - _WorldSpaceCameraPos;
+                   output.angle = acos(dot(normalize(_PlayerVelocity), normalize(output.viewDir)));
                    output.pos = UnityObjectToClipPos(input.vertex);
 
                    return output;

@@ -44,7 +44,7 @@
 
             float4 _PlayerVelocity = float4(0, 0, 0, 0);
             float _PlayerSpeed = 0;
-            float4 _PlayerOffset = 0;
+            float4 _PlayerOffset = float4(0, 0, 0, 0);
             float _WorldTime = 0;
             float _LightSpeed = 100;
             float4x4 _VelocityRotation;
@@ -70,12 +70,13 @@
             {
                 v2f o;
 
-                //Calculate angle for Dopplershift
-                o.angle = acos(dot(_PlayerVelocity, float3(1, 0, 0)));
 
                 o.vertex = mul(unity_ObjectToWorld, input.vertex);
                 //Transform position so our player is the origin
                 o.vertex -= _PlayerOffset;
+
+                //Calculate angle for Dopplershift
+                o.angle = acos(dot(normalize(_PlayerVelocity), normalize(o.vertex)));
 
                 float4 pos = o.vertex;
                 if (_PlayerSpeed != 0)
