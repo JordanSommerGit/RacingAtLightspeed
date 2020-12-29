@@ -41,7 +41,7 @@
 
             struct vertexOutput
             {
-               float4 pos : SV_POSITION;
+               float4 pos : POSITION;
                float3 viewDir : TEXCOORD1;
             };
 

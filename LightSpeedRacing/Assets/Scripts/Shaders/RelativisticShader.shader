@@ -11,7 +11,7 @@ Shader "Relativistic/RelativisticShader"
 		_IRTex("Infrared Texture",2D) = "" {}
 	}
 
-		CGINCLUDE
+CGINCLUDE
 
 #pragma glsl
 #include "UnityCG.cginc"
@@ -41,7 +41,6 @@ Shader "Relativistic/RelativisticShader"
 #define UV_START 0
 
 
-//This is the data sent from the vertex shader to the fragment shader
 	struct v2f
 	{
 		float4 pos : POSITION;
@@ -54,34 +53,29 @@ Shader "Relativistic/RelativisticShader"
 		//Variables that we use to access texture data
 		sampler2D _Tex2D;
 
-		float4 _vpc = float4(0, 0, 0, 0); //velocity of player
-		float4 _playerOffset = float4(0, 0, 0, 0); //player position in world
-		float _spdOfLight = 100; //current speed of light
-		float _wrldTime = 0; //current time in world
-		float _strtTime = 0; //starting time in world
+		float4 _PlayerVelocity = float4(0, 0, 0, 0); //velocity of player
+		float4 _PlayerOffset = float4(0, 0, 0, 0); //player position in world
+		float _LightSpeed = 100; //current speed of light
 		float _colorShift = 1; //actually a boolean, should use color effects or not ( doppler + spotlight). 
 
 		float xyr = 1; // xy ratio
 		float xs = 1; // x scale
-
-		uniform float4 _MainTex_TexelSize;
-		uniform float4 _CameraDepthTexture_ST;
 
 		v2f vert(appdata_img v)
 		{
 			v2f o;
 
 			o.pos = mul(unity_ObjectToWorld, v.vertex); //get position in world frame	
-			o.pos -= _playerOffset; //Shift such that we use a coordinate system where the player is at 0,0,0
+			o.pos -= _PlayerOffset; //Shift such that we use a coordinate system where the player is at 0,0,0
 
 
 			o.uv1.xy = v.texcoord; //get the UV coordinate for the current vertex, will be passed to fragment shade
 
-			float speed = sqrt(pow((_vpc.x), 2) + pow((_vpc.y), 2) + pow((_vpc.z), 2));
+			float speed = sqrt(pow((_PlayerVelocity.x), 2) + pow((_PlayerVelocity.y), 2) + pow((_PlayerVelocity.z), 2));
 
 			// relative velocity calculation
 			// no dynamic objects means, relative velocity = player velocity
-			float4 vr = _vpc * -1;
+			float4 vr = _PlayerVelocity * -1;
 			//relative speed
 			float speedr = sqrt(pow((vr.x), 2) + pow((vr.y), 2) + pow((vr.z), 2));
 			o.svc = sqrt(1 - speedr * speedr);
@@ -98,11 +92,11 @@ Shader "Relativistic/RelativisticShader"
 				if (speed != 0)
 				{
 					//we're getting the angle between our z direction of movement and the world's Z axis
-					a = -acos(-_vpc.z / speed);
-					if (_vpc.x != 0 || _vpc.y != 0)
+					a = -acos(-_PlayerVelocity.z / speed);
+					if (_PlayerVelocity.x != 0 || _PlayerVelocity.y != 0)
 					{
-						ux = _vpc.y / sqrt(_vpc.x * _vpc.x + _vpc.y * _vpc.y);
-						uy = -_vpc.x / sqrt(_vpc.x * _vpc.x + _vpc.y * _vpc.y);
+						ux = _PlayerVelocity.y / sqrt(_PlayerVelocity.x * _PlayerVelocity.x + _PlayerVelocity.y * _PlayerVelocity.y);
+						uy = -_PlayerVelocity.x / sqrt(_PlayerVelocity.x * _PlayerVelocity.x + _PlayerVelocity.y * _PlayerVelocity.y);
 					}
 					else
 					{
@@ -119,13 +113,13 @@ Shader "Relativistic/RelativisticShader"
 				}
 
 				float c = -(riw.x * riw.x + riw.y * riw.y + riw.z * riw.z);
-				float d = (_spdOfLight * _spdOfLight);
+				float d = (_LightSpeed * _LightSpeed);
 				float tisw = (float)((-((float)4) * d * c)) / (((float)2) * d);
 
 				//Apply Lorentz transform
 				// float newz =(riw.z + state.PlayerVelocity * tisw) / state.SqrtOneMinusVSquaredCWDividedByCSquared;
 				//I had to break it up into steps, unity was getting order of operations wrong.	
-				float newz = (((float)speed * _spdOfLight) * tisw);
+				float newz = (((float)speed * _LightSpeed) * tisw);
 
 				newz = riw.z + newz;
 				newz /= (float)sqrt(1 - (speed * speed));
@@ -141,13 +135,13 @@ Shader "Relativistic/RelativisticShader"
 				}
 			}
 
-			riw += _playerOffset;
+			riw += _PlayerOffset;
 
 			o.pos = mul(unity_WorldToObject * 1.0, riw);
 			o.pos = UnityObjectToClipPos(o.pos);
 
 			o.pos2 = mul(unity_WorldToObject, o.pos);
-			o.pos2 -= _playerOffset;
+			o.pos2 -= _PlayerOffset;
 
 			return o;
 		}
@@ -249,7 +243,7 @@ Shader "Relativistic/RelativisticShader"
 			float z1 = i.pos2.z;
 
 			// ( 1 - (v/c)cos(theta) ) / sqrt ( 1 - (v/c)^2 )
-			float shift = (1 - ((x1 * _vpc.x + y1 * _vpc.y + z1 * _vpc.z) / sqrt(x1 * x1 + y1 * y1 + z1 * z1))) / i.svc;
+			float shift = (1 - ((x1 * _PlayerVelocity.x + y1 * _PlayerVelocity.y + z1 * _PlayerVelocity.z) / sqrt(x1 * x1 + y1 * y1 + z1 * z1))) / i.svc;
 			if (_colorShift == 0)
 			{
 				shift = 1.0f;
@@ -260,9 +254,6 @@ Shader "Relativistic/RelativisticShader"
 			float IR = tex2D(_Tex2D, i.uv1).r;
 
 			float3 rgb = data.xyz;
-
-
-
 
 			//Color shift due to doppler, go from RGB -> XYZ, shift, then back to RGB.
 			float3 xyz = RGBToXYZC(float(rgb.x),float(rgb.y),float(rgb.z));
@@ -281,12 +272,7 @@ Shader "Relativistic/RelativisticShader"
 			float3 rgbFinal = XYZToRGBC(xf,yf,zf);
 			rgbFinal = constrainRGB(rgbFinal.x,rgbFinal.y, rgbFinal.z); //might not be needed
 
-			//Test if unity_Scale is correct, unity occasionally does not give us the correct scale and you will see strange things in vertices,  this is just easy way to test
-			//float4x4 temp  = mul(unity_Scale.w*_Object2World, _World2Object);
-			//float4 temp2 = mul( temp,float4( (float)rgbFinal.x,(float)rgbFinal.y,(float)rgbFinal.z,data.a));
-			//return temp2;	
-			//float4 temp2 =float4( (float)rgbFinal.x,(float)rgbFinal.y,(float)rgbFinal.z,data.a );
-			return float4((float)rgbFinal.x,(float)rgbFinal.y,(float)rgbFinal.z,data.a); //use me for any real build
+			return float4(data.x, data.y, data.z, data.a); //use me for any real build
 		}
 
 			ENDCG
@@ -314,9 +300,7 @@ Shader "Relativistic/RelativisticShader"
 				ENDCG
 			}
 		}
-
-		Fallback "Unlit/Transparent"
-
-} // shader
+		//Fallback "Unlit/Transparent"
+}
 
 

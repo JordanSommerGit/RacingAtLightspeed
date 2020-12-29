@@ -6,5 +6,5 @@ public class RelativisticObjects : MonoBehaviour
 {
     private void Update()
     {
-	}
+    }
 }
