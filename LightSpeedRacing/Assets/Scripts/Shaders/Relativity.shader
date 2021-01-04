@@ -94,10 +94,10 @@
                     float vertexTime = (-2.0f * rv - (sqrt((rv * rv) - 4.0f * d * rSquared))) / (2.0f * d);
 
                     //Apply time dialation
-                    pos -= rotatedVelocity * vertexTime;
+                    pos += rotatedVelocity * vertexTime;
 
                     //Apply Lorentz transformation
-                    pos.x = (pos.x - (_PlayerSpeed * _LightSpeed) * vertexTime) / sqrt(1 - pow(_PlayerSpeed, 2) / pow(_LightSpeed, 2));
+                    //pos.x = (pos.x - _PlayerSpeed * vertexTime) / sqrt(1 - pow(_PlayerSpeed, 2) / pow(_LightSpeed, 2));
 
                     //Rotate position back
                     pos = mul(pos, _InverseVelocityRotation);

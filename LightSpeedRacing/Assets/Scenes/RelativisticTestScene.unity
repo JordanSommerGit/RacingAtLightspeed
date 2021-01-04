@@ -245,7 +245,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1372691959
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -587,12 +587,22 @@ PrefabInstance:
     - target: {fileID: 2545927637622317852, guid: 70b77c4c0009fe44a94c1790b7b56c94,
         type: 3}
       propertyPath: m_Drag
-      value: 0.5
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2545927637622317852, guid: 70b77c4c0009fe44a94c1790b7b56c94,
+        type: 3}
+      propertyPath: m_Constraints
+      value: 112
       objectReference: {fileID: 0}
     - target: {fileID: 2545927637622317854, guid: 70b77c4c0009fe44a94c1790b7b56c94,
         type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 2545927637622317855, guid: 70b77c4c0009fe44a94c1790b7b56c94,
+        type: 3}
+      propertyPath: speedIncrease
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70b77c4c0009fe44a94c1790b7b56c94, type: 3}
@@ -603,6 +613,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5741117541249292244, guid: 1a2bed3b08015ca4abfaec921f1cb5be,
+        type: 3}
+      propertyPath: speedOfLight
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5741117541249292245, guid: 1a2bed3b08015ca4abfaec921f1cb5be,
         type: 3}
       propertyPath: m_Name

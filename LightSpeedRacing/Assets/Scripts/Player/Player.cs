@@ -8,6 +8,12 @@ public class Player : MonoBehaviour
     private float maxSpeed = 3.0f;
     [SerializeField]
     private float speedIncrease = 10.0f;
+    [SerializeField]
+    private float drag = 5.0f;
+    [SerializeField]
+    private float velocityChange = 10.0f;
+    [SerializeField]
+    private float lookSpeed = 1.5f;
     public Vector3 velocity = Vector3.zero;
     public float speed = 0.0f;
 
@@ -23,25 +29,33 @@ public class Player : MonoBehaviour
         if (!rigid)
             return;
 
-        Vector2 movement = Vector2.zero;
+        Vector3 movement = Vector2.zero;
         if (Input.GetKey(KeyCode.W))
-            movement.y++;
+            movement.z++;
         if (Input.GetKey(KeyCode.S))
-            movement.y--;
+            movement.z--;
         if (Input.GetKey(KeyCode.A))
             movement.x--;
         if (Input.GetKey(KeyCode.D))
             movement.x++;
         movement = movement.normalized;
+        movement = transform.rotation * movement;
 
         if (rigid.velocity.magnitude < maxSpeed)
-            rigid.velocity += new Vector3(movement.x, 0, movement.y) * speedIncrease * Time.deltaTime;
+            rigid.velocity += movement * speedIncrease * Time.deltaTime;
         else
-            if (movement.magnitude != 0)
-                rigid.velocity = new Vector3(movement.x, 0, movement.y) * maxSpeed;
+            rigid.velocity -= rigid.velocity.normalized * drag * Time.deltaTime;
+
+        if (movement.magnitude == 0.0f)
+            rigid.velocity -= rigid.velocity.normalized * drag * Time.deltaTime;
+
 
         velocity = rigid.velocity;
         speed = velocity.magnitude;
+
+        float yaw = Input.GetAxis("Mouse X");
+        float pitch = Input.GetAxis("Mouse Y");
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x - pitch * lookSpeed, transform.eulerAngles.y + yaw * lookSpeed, 0);
 
         Shader.SetGlobalVector("_PlayerVelocity", new Vector4(velocity.x, velocity.y, velocity.z, 1));
         Shader.SetGlobalFloat("_PlayerSpeed", velocity.magnitude);
