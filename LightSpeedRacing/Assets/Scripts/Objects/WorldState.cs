@@ -17,7 +17,6 @@ public class WorldState : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("Beta: " + player.speed / speedOfLight);
         Shader.SetGlobalFloat("_LightSpeed", speedOfLight);
         Shader.SetGlobalFloat("_WorldTime", Time.time);
     }

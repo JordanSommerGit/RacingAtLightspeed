@@ -11,8 +11,6 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float drag = 5.0f;
     [SerializeField]
-    private float velocityChange = 10.0f;
-    [SerializeField]
     private float lookSpeed = 1.5f;
     public Vector3 velocity = Vector3.zero;
     public float speed = 0.0f;
@@ -29,6 +27,7 @@ public class Player : MonoBehaviour
         if (!rigid)
             return;
 
+        //Input
         Vector3 movement = Vector2.zero;
         if (Input.GetKey(KeyCode.W))
             movement.z++;
@@ -38,9 +37,14 @@ public class Player : MonoBehaviour
             movement.x--;
         if (Input.GetKey(KeyCode.D))
             movement.x++;
+        if (Input.GetKey(KeyCode.Space))
+            movement.y++;
+        if (Input.GetKey(KeyCode.LeftControl))
+            movement.y--;
         movement = movement.normalized;
         movement = transform.rotation * movement;
 
+        //Movement
         if (rigid.velocity.magnitude < maxSpeed)
             rigid.velocity += movement * speedIncrease * Time.deltaTime;
         else
@@ -57,6 +61,7 @@ public class Player : MonoBehaviour
         float pitch = Input.GetAxis("Mouse Y");
         transform.eulerAngles = new Vector3(transform.eulerAngles.x - pitch * lookSpeed, transform.eulerAngles.y + yaw * lookSpeed, 0);
 
+        //Shader
         Shader.SetGlobalVector("_PlayerVelocity", new Vector4(velocity.x, velocity.y, velocity.z, 1));
         Shader.SetGlobalFloat("_PlayerSpeed", velocity.magnitude);
         Shader.SetGlobalVector("_PlayerOffset", new Vector4(transform.position.x, transform.position.y, transform.position.z, 1));

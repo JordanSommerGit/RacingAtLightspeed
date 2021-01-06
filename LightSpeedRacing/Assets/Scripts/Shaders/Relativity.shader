@@ -6,11 +6,12 @@
     }
         SubShader
     {
-        Tags { "RenderType" = "Opaque" }
+        Tags { "Queue" = "AlphaTest" "RenderType" = "TransparentCutout" "IgnoreProjector" = "True" }
         LOD 100
 
         Pass
         {
+            AlphaToMask On
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
