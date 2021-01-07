@@ -1,10 +1,15 @@
-﻿Shader "Relativistic/Relativity"
+﻿// Upgrade NOTE: commented out 'float4 unity_LightmapST', a built-in variable
+// Upgrade NOTE: commented out 'sampler2D unity_Lightmap', a built-in variable
+// Upgrade NOTE: replaced tex2D unity_Lightmap with UNITY_SAMPLE_TEX2D
+
+Shader "Relativistic/Relativity"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
     }
-        SubShader
+
+    SubShader
     {
         Tags { "Queue" = "AlphaTest" "RenderType" = "TransparentCutout" "IgnoreProjector" = "True" }
         LOD 100
@@ -12,11 +17,14 @@
         Pass
         {
             AlphaToMask On
+            Lighting On
+            Tags {"LightMode" = "ForwardBase"}
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "UnityLightingCommon.cginc"
 
             //Color shift variables, used to make guassians for XYZ curves
             //Source: OpenRelativity
@@ -55,14 +63,21 @@
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+                float2 uv1 : TEXCOORD1;
+                float4 normal : NORMAL;
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
+                float2 uv1 : TEXCOORD1;
                 float4 vertex : SV_POSITION;
-                float angle : TEXCOORD1;
+                float angle : TEXCOORD2;
+                float4 diff : COLOR0;
             };
+
+            // sampler2D unity_Lightmap;
+            // float4 unity_LightmapST;
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
@@ -111,7 +126,12 @@
 
                 o.vertex = UnityObjectToClipPos(pos);
                 o.uv = TRANSFORM_TEX(input.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                o.uv1 = input.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+
+                half3 worldNormal = UnityObjectToWorldNormal(input.normal);
+                half nl = max(0, dot(worldNormal, _WorldSpaceLightPos0.xyz));
+                o.diff = nl * _LightColor0;
+
                 return o;
             }
 
@@ -221,6 +241,10 @@
             {
                 //Sample
                 float4 col = tex2D(_MainTex, i.uv);
+                //col.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv1));
+
+                float alpha = col.a;
+                col *= i.diff;
                 
                 //Convert to XYZ
                 float3 colXYZ = RGBtoXYZ(float3(col.x, col.y, col.z));
@@ -250,7 +274,7 @@
                 colXYZ.y = clamp(colXYZ.y, 0.0f, 1.0f);
                 colXYZ.z = clamp(colXYZ.z, 0.0f, 1.0f);
                 
-                return float4(colXYZ.x, colXYZ.y, colXYZ.z, col.w);
+                return float4(colXYZ.x, colXYZ.y, colXYZ.z, alpha);
             }
             ENDCG
         }
